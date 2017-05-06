@@ -4,9 +4,9 @@ public class Player {
 	private String name;
 	private Board board;
 	private boolean isSettingUp = true, currentTurn;
-	public Player(String name, int x, int y){
+	public Player(String name, int x, int y, boolean showBtn){
 		this.name = name;
-		board = new Board(this, x, y, 25, 25, 1000, 1000);
+		board = new Board(this, x, y, 25, 25, 1000, 1000, showBtn);
 	}
 	
 	public String toString(){
@@ -42,4 +42,36 @@ public class Player {
 		return board;
 	}
 	
+	public void changeEdit(){
+		for(Ship ship : board.getShips()){
+			ship.changeMovable();
+		}
+		isSettingUp =! isSettingUp;
+		//System.out.println("Changing state");
+	}
+	
+	public void changeEdit(boolean state){
+		for(Ship ship : board.getShips()){
+			ship.changeMovable(state);
+		}
+		isSettingUp = state;
+		//System.out.println("Changing state");
+	}
+
+	private void hideStart() {
+		board.removeStart();
+		
+	}
+	
+	protected void addShips(Ship[] ships){
+		board.createShips(ships);
+	}
+	
+	protected void addShip(int x, int y, int xSize, int ySize) {
+		board.createShip(x, y, xSize, ySize);
+	}
+	
+	public void addShip(Ship ship){
+		board.createShip(ship);
+	}
 }
