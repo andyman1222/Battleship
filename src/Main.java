@@ -3,14 +3,14 @@ import javax.swing.JOptionPane;
 //main will handle the turns (and rules?) of the game
 public class Main {
 	
-	public static final boolean dev = true;
+	public static final boolean dev = false;
 	private static Player[] players = {
-			new Player("Player 1",0,0, true),
-			new CPUplayer("CPU player",1000,0)
+			new Player("Player 1",0,0, 25, 25, 1000, 1000, true),
+			new CPUplayer("CPU player",1000,0, 25, 25, 1000, 1000)
 	};
 	
 	//private int i = (int) (Math.round(Math.random())*players.length);
-	private static int i = -2;
+	private static int i = -1;
 	protected static Player currentPlayer, localPlayer = players[0];
 	private static Ship[] startingShips = {
 			new Ship(0,0,1,5),
@@ -45,17 +45,30 @@ public class Main {
 		for(Player player : players){
 			player.getBoard().removeStart();
 		}
+		currentPlayer = players[(int)(Math.random()*2)];
 		nextTurn();
 	}
 	
+	/**
+	 * gets player whose turn it is
+	 * @return player whose turn it is
+	 */
 	public static Player getCurrentPlayer(){
 		return currentPlayer;
 	}
 	
+	/**
+	 * 
+	 * @return list of all players
+	 */
 	public static Player[] getPlayers(){
 		return players;
 	}
 	
+	/**
+	 * remove a player when they lose.
+	 * @param player player to remove from game
+	 */
 	public static void destroy(Player player){
 		for(Player p : players){
 			if(p.equals(player)){
@@ -64,25 +77,43 @@ public class Main {
 			}
 			}
 		}
+	
+	/**
+	 * exits
+	 */
 	public static void closeAllWindows(){
 		System.exit(0);
 	}
 
+	/**
+	 * moves all windows to the front when one window is clicked
+	 */
 	public static void changeFocus() {
 		System.out.println("Moving windows");
 		for(Player player : players)
 		player.getBoard().setFocus();
 	}
 	
+	/**
+	 * advances game 1 turn or checks if there is 1 player left
+	 */
 	public static void nextTurn(){
+		currentPlayer.setTurn(false);
 		if(players.length<2){
 			JOptionPane.showMessageDialog(null, "" + currentPlayer + " has won!");
 			System.exit(0);
 		}
-		i=(i+2)%players.length;
+		i=(i+1)%players.length;
 		currentPlayer = players[i];
-		System.out.println("Switching turns");
+		System.out.println("Switching turns- " + currentPlayer);
 		if(currentPlayer == null) nextTurn();
-		currentPlayer.setTurn();
+		else{
+			currentPlayer.setTurn(true);
+			if(currentPlayer instanceof CPUplayer){
+				CPUplayer currentCPUPlayer = (CPUplayer) currentPlayer;
+				currentCPUPlayer.attack();
+				Main.nextTurn();
+			}
+		}
 	}
 }

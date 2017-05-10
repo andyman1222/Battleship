@@ -20,28 +20,39 @@ public class Ship extends JComponent {
 	private boolean dragShip = false;
 	private boolean destroyed = false;
 	private boolean[][] damagedSections;
-
+	private int xSizeScl = xSize * board.getSquaresXsize(), ySizeScl = ySize * board.getSquaresYsize(), xScl = x * board.getSquaresXsize(), yScl = y * board.getSquaresYsize();
+	
 	/**
-	 * Creates a ship in the ship placing menu
-	 * 
-	 * @param board
-	 *            board to place the ship on
-	 * @param xSize
-	 * @param ySize
+	 * create a new ship with specified info
+	 * @param board board the ship is on
+	 * @param xSize width of ship
+	 * @param ySize height of ship
+	 * @param x x pos of ship
+	 * @param y y pos of ship
 	 */
-
 	public Ship(Board board, int xSize, int ySize, int x, int y) {
 		this.board = board;
-		this.xSize = xSize * board.getSquaresXsize();
-		this.ySize = ySize * board.getSquaresYsize();
+		this.xSize = xSize;
+		this.ySize = ySize;
 		damagedSections = new boolean[xSize][ySize];
 		// System.out.println("Listener added");
-		this.x = x * board.getSquaresXsize();
-		this.y = y * board.getSquaresYsize();
+		this.x = x;
+		this.y = y;
+		xSizeScl = xSize * board.getSquaresXsize();
+		ySizeScl = ySize * board.getSquaresYsize();
+		xScl = x * board.getSquaresXsize();
+		yScl = y * board.getSquaresYsize();
 		// System.out.println(this);
 		repaint();
 	}
 
+	/**
+	 * creates a new ship not on a board. Use in an instance array to copy to via Board's copy method
+	 * @param xSize width of ship
+	 * @param ySize height of ship
+	 * @param x x position of ship
+	 * @param y y position of ship
+	 */
 	public Ship(int xSize, int ySize, int x, int y) {
 		this.xSize = xSize;
 		this.ySize = ySize;
@@ -51,34 +62,47 @@ public class Ship extends JComponent {
 		// System.out.println(this);
 	}
 
+	@Override
+	/**
+	 * @return a Rectangle representing the tiles the ship is located on (note: Rectangle is larger than what is drawn because it includes the whole tile)
+	 */
 	public Rectangle getBounds() {
 		return new Rectangle(x, y, xSize, ySize);
 	}
 
+	/**
+	 * 
+	 * @param x x position to test
+	 * @param y y position to test
+	 * @return a Rectangle representing the tiles the ship will be located on if it was located at (x, y)
+	 */
 	public Rectangle getBounds(int x, int y) {
 		return new Rectangle(x, y, xSize, ySize);
 	}
 
+	/**
+	 * Draws the ship and any damaged sections
+	 */
 	@Override
 	public void paintComponent(Graphics g) {
 		// super.paintComponent(g);
 		if (destroyed == true) {
 			g.setColor(Color.RED);
-			g.fillRect(x + 5, y + 5, xSize - 10, ySize - 10);
+			g.fillRect(xScl + 5, yScl + 5, xSizeScl - 10, ySizeScl - 10);
 		} else {
 			if (board.getPlayer() == Main.localPlayer||Main.dev == true) {
 				g.setColor(Color.GRAY);
-				g.fillRect(x + 5, y + 5, xSize - 10, ySize - 10);
+				g.fillRect(xScl + 5, yScl + 5, xSizeScl - 10, ySizeScl - 10);
 			}
 			for (int i = 0; i < damagedSections.length; i++) {
 				for (int ii = 0; ii < damagedSections[i].length; ii++) {
 					if (damagedSections[i][ii]) {
 						g.setColor(Color.RED);
 						if(!rotate)
-							g.fillOval(x + (i * board.getSquaresXsize()+(board.getSquaresXsize()/8)), y + (ii * board.getSquaresXsize()+(board.getSquaresXsize()/8)),
+							g.fillOval(xScl + (i * board.getSquaresXsize()+(board.getSquaresXsize()/8)), yScl + (ii * board.getSquaresXsize()+(board.getSquaresXsize()/8)),
 								(int) (board.getSquaresXsize()-10), (int) (board.getSquaresYsize() -10));
 						else
-							g.fillOval(x + (ii * board.getSquaresXsize()+(board.getSquaresXsize()/8)), y + (i * board.getSquaresXsize()+(board.getSquaresXsize()/8)),
+							g.fillOval(xScl + (ii * board.getSquaresXsize()+(board.getSquaresXsize()/8)), yScl + (i * board.getSquaresXsize()+(board.getSquaresXsize()/8)),
 									(int) (board.getSquaresXsize() -10), (int) (board.getSquaresYsize() -10));
 					}
 				}
@@ -98,7 +122,7 @@ public class Ship extends JComponent {
 		for (Ship compare : board.getShips())
 			if (compare != this)
 				if (compare.getBounds().intersects(getBounds(x, y))) {
-					System.out.println(compare.getBounds().intersection(getBounds(x, y)));
+					//System.out.println(compare.getBounds().intersection(getBounds(x, y)));
 					return true;
 				}
 		return false;
@@ -112,7 +136,7 @@ public class Ship extends JComponent {
 		return (int) Math.floor(i / dimension) * dimension;
 	}
 
-	public boolean mouseInBounds(Point e) {
+	public boolean isInBounds(Point e) {
 		return toBoardDimensions((int) e.getX(), board.getSquaresXsize()) >= x
 				&& toBoardDimensions((int) e.getY(), board.getSquaresYsize()) >= y
 				&& toBoardDimensions((int) e.getX(), board.getSquaresXsize()) <= x + xSize-1
@@ -120,18 +144,32 @@ public class Ship extends JComponent {
 
 	}
 
+	/**
+	 * change the movable state of the ship
+	 */
 	protected void changeMovable() {
 		movable = !movable;
 	}
 
+	/**
+	 * change the movable state of the ship
+	 * @param bool state to change to
+	 */
 	protected void changeMovable(boolean bool) {
 		movable = bool;
 	}
 
+	/**
+	 * check if the ship is movable
+	 * @return true if it is
+	 */
 	public boolean isMovable() {
 		return movable;
 	}
 
+	/**
+	 * rotates the ship 90°
+	 */
 	protected void rotate() {
 		int temp = xSize;
 		xSize = ySize;
@@ -146,6 +184,10 @@ public class Ship extends JComponent {
 
 	}
 	
+	/**
+	 * rotates the ship 90° and returns whether or not it was sucessful.
+	 * @return true if the ship rotated, false if something interfered (collision)
+	 */
 	protected boolean rotateVal() {
 		int temp = xSize;
 		xSize = ySize;
@@ -162,11 +204,18 @@ public class Ship extends JComponent {
 
 	}
 
+	/**
+	 * causes ship to stop being dragged by mouse
+	 */
 	protected void stopMoving() {
 		dragShip = false;
 
 	}
 
+	/**
+	 * moves the ship to e if possible
+	 * @param e point to move the ship to
+	 */
 	protected void drag(Point e) {
 		int mX = toBoardDimensions((int) e.getX(), board.getSquaresYsize());
 		int mY = toBoardDimensions((int) e.getY(), board.getSquaresYsize());
@@ -178,6 +227,12 @@ public class Ship extends JComponent {
 
 	}
 	
+	/**
+	 * move the ship to (x, y) with rotation rotate
+	 * @param x x pos to move the ship to
+	 * @param y y pos to move the ship to
+	 * @param rotate rotation of the ship
+	 */
 	protected void position(int x, int y, boolean rotate){
 		if (isInBoardBounds(x, y) && !collidingWithAnotherShip(x, y)) {
 			this.x = x;
@@ -188,6 +243,13 @@ public class Ship extends JComponent {
 		
 	}
 	
+	/**
+	 * move the ship to (x, y) with rotation rotate
+	 * @param x x pos to move the ship to
+	 * @param y y pos to move the ship to
+	 * @param rotate rotation of the ship
+	 * @return true if it moved successfully, false otherwise (collision)
+	 */
 	protected boolean positionVal(int x, int y, boolean rotate){
 		if (isInBoardBounds(x, y) && !collidingWithAnotherShip(x, y)) {
 			this.x = x;
@@ -199,10 +261,20 @@ public class Ship extends JComponent {
 		else return false;
 	}
 
+	/**
+	 * copies this ship to a board. Use with the constructor that does not have a Board param
+	 * @param board board the copied ship belongs to
+	 * @return new ship that belongs to a board
+	 */
 	protected Ship copy(Board board) {
 		return new Ship(board, x, y, xSize, ySize);
 	}
 
+	/**
+	 * attacks the ship
+	 * @param e point to attack the ship at
+	 * @return true if it hit, false otherwise (attempting to hit a region already hit)
+	 */
 	public boolean attack(Point e) {
 		int mX = toBoardDimensions((int) e.getX(), board.getSquaresYsize());
 		int mY = toBoardDimensions((int) e.getY(), board.getSquaresYsize());
@@ -211,12 +283,14 @@ public class Ship extends JComponent {
 		if(!rotate){
 			if (damagedSections[hitX][hitY] == false){
 				damagedSections[hitX][hitY] = true;
+				//System.out.println("Registered hit");
 				return true;
 			}
 			else return false;
 		}
 		else if(damagedSections[hitY][hitX] == false){
 			damagedSections[hitY][hitX] = true;
+			//System.out.println("Registered hit");
 			return true;
 		}
 		else return false;
