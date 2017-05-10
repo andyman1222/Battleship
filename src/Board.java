@@ -183,7 +183,7 @@ public class Board extends JPanel {
 			ships.add(addShip);
 			frame.add(addShip);
 			repaint();
-			floatingShips += shipsArr.length;
+			floatingShips ++;
 		}
 	}
 
@@ -269,6 +269,10 @@ public class Board extends JPanel {
 		return x>=0&&y>=0&&x<squaresX&&y<squaresY;
 	}
 	
+	private boolean isInBoardBoundsAttack(int x, int y) {
+		return x>=0&&y>=0&&x<squaresX&&y<squaresY;
+	}
+	
 	public int round(int i, int dimension){
 		return (int)Math.round(i/dimension)*dimension;
 	}
@@ -314,19 +318,21 @@ public class Board extends JPanel {
 					} else if (Main.getCurrentPlayer() == player) {
 						// do nothing- current turn player clicking on self
 					} else if(Main.gameStart){
-						hit = true;
-						if(ship.attack(getLocationRelativeToBoard())){
-							System.out.println("Hit!");
-							if(ship.checkDestroyed()) floatingShips--;
-							if(floatingShips <= 0) player.defeat();
-							repaint();
-							Main.nextTurn();
+						if(isInBoardBoundsAttack((int)getLocationRelativeToBoard().getX(),(int)getLocationRelativeToBoard().getY())){
+							hit = true;
+							if(ship.attack(getLocationRelativeToBoard())){
+								System.out.println("Hit!");
+								if(ship.checkDestroyed()) floatingShips--;
+								if(floatingShips <= 0) player.defeat();
+								repaint();
+								Main.nextTurn();
+							}
 						}
 					}
 				}
 			}
 			if(!hit&&Main.gameStart&&!player.isCurrentTurn())
-				if(isInBoardBounds((int)getLocationRelativeToBoard().getX(),(int)getLocationRelativeToBoard().getY())){
+				if(isInBoardBoundsAttack((int)getLocationRelativeToBoard().getX()+1,(int)getLocationRelativeToBoard().getY()+1)){
 					int mX = (int) getLocationRelativeToBoard().getX(), mY = (int)getLocationRelativeToBoard().getY();
 						if(!misses[mX][mY]){
 							misses[mX][mY] = true;
@@ -421,7 +427,7 @@ public class Board extends JPanel {
 		prevHit = false;
 		sankShip = false;
 		boolean hit = false;
-		if(isInBoardBounds((int)e.getX(),(int)e.getY())){
+		if(isInBoardBoundsAttack((int)e.getX()+1,(int)e.getY()+1)){
 		for (Ship ship : ships) {
 			if (ship.isInBounds(e)) {
 				if (Main.getCurrentPlayer() == player) {
@@ -431,7 +437,10 @@ public class Board extends JPanel {
 					System.out.println("Ship clicked on...?");
 					if(ship.attack(e)){
 						System.out.println("Hit!");
-						if(ship.checkDestroyed()) floatingShips--;
+						if(ship.checkDestroyed()){
+							floatingShips--;
+							System.out.println("Remanining ships: " + floatingShips);
+						}
 						if(floatingShips <= 0) player.defeat();
 						repaint();
 						prevHit = true;
@@ -442,7 +451,7 @@ public class Board extends JPanel {
 			}
 		}
 		if(!hit&&Main.gameStart&&!player.isCurrentTurn())
-			if(isInBoardBounds((int)e.getX(),(int)e.getY())){
+			if(isInBoardBoundsAttack((int)e.getX(),(int)e.getY())){
 				int mX = (int)e.getX();
 				int mY = (int)e.getY();
 					if(!misses[mX][mY]){

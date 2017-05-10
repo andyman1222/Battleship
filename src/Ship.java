@@ -97,7 +97,7 @@ public class Ship extends JComponent {
 					if (damagedSections[i][ii]) {
 						g.setColor(Color.RED);
 						if(!rotate)
-							g.fillOval(x*xScl + (i *xScl+(xScl/8)), y*yScl + (i *yScl+(yScl/8)),
+							g.fillOval(x*xScl + (i *xScl+(xScl/8)), y*yScl + (ii *yScl+(yScl/8)),
 								(int) (xScl-10), (int) (yScl -10));
 						else
 							g.fillOval(x*xScl + (ii * xScl+(xScl/8)), y*yScl + (i * xScl+(xScl/8)),

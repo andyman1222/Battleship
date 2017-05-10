@@ -3,7 +3,7 @@ import java.awt.Point;
 public class CPUplayer extends Player {
 
 	private int prevHits = 0;
-	private boolean[][] alreadyCheckedIndexes = new boolean[getBoard().getX()][getBoard().getY()];
+	private boolean[][] alreadyCheckedIndexes;
 
 	/**
 	 * create new CPU player
@@ -83,7 +83,7 @@ public class CPUplayer extends Player {
 										return;
 									}
 							}
-							else System.out.println(alreadyCheckedIndexes[i][x]);
+							else System.out.println(alreadyCheckedIndexes.length);
 						}
 				}
 
@@ -145,7 +145,7 @@ public class CPUplayer extends Player {
 				System.out.println("restarting sequence...");
 				attack();
 			} else if (targetBoard.getPrevHit()) {
-				alreadyCheckedIndexes[nextX][nextY] = getBoard().getPrevHit();
+				alreadyCheckedIndexes[nextX][nextY] = targetBoard.getPrevHit();
 				prevHits++;
 				if (targetBoard.sankShip())
 					prevHits = 0;
@@ -182,7 +182,7 @@ public class CPUplayer extends Player {
 				System.out.println("restarting sequence...");
 				attack();
 			} else if (targetBoard.getPrevHit()) {
-				alreadyCheckedIndexes[nextX][nextY] = getBoard().getPrevHit();
+				alreadyCheckedIndexes[nextX][nextY] = targetBoard.getPrevHit();
 				prevHits++;
 				if (targetBoard.sankShip())
 					prevHits = 0;

@@ -3,10 +3,10 @@ import javax.swing.JOptionPane;
 //main will handle the turns (and rules?) of the game
 public class Main {
 	
-	public static final boolean dev = true;
+	public static final boolean dev = false;
 	private static Player[] players = {
-			new Player("Player 1",0,0, 25, 25, 1000, 1000, true),
-			new CPUplayer("CPU player",1000,0, 25, 25, 1000, 1000)
+			new Player("Player 1",0,0, 25, 25, 750, 750, true),
+			new CPUplayer("CPU player",750,0, 25, 25, 750, 750)
 	};
 	
 	//private int i = (int) (Math.round(Math.random())*players.length);
