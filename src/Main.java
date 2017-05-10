@@ -3,7 +3,7 @@ import javax.swing.JOptionPane;
 //main will handle the turns (and rules?) of the game
 public class Main {
 	
-	public static final boolean dev = false;
+	public static final boolean dev = true;
 	private static Player[] players = {
 			new Player("Player 1",0,0, 25, 25, 1000, 1000, true),
 			new CPUplayer("CPU player",1000,0, 25, 25, 1000, 1000)
@@ -34,8 +34,10 @@ public class Main {
 			player.addShips(startingShips);
 		boolean start = false;
 		while(!start){
+			//System.out.println("Running...");
 			start = true;
 			for(Player player : players){
+				player.getBoard().repaint();
 				if(!player.isInPlay()){
 					start = false;
 				}

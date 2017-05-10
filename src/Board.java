@@ -3,6 +3,7 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -39,10 +40,20 @@ public class Board extends JPanel {
 	 * @param squaresX number of squares along X axis
 	 * @param squaresY number of squares along Y axis
 	 * @param width width of window in pixels
-	 * @param height height of window + 250 pixels
+	 * @param height height of window + 160 pixels
 	 * @param showBtn whether or not to show the start game btn on the bottom of the screen. Typically true for human players.
 	 */
 	public Board(Player player, int x, int y, int squaresX, int squaresY, int width, int height, boolean showBtn) {
+		this.width = width;
+		this.height = height;
+		this.squaresXsize = width / squaresX;
+		this.squaresYsize = height / squaresY;
+		this.player = player;
+		misses = new boolean[squaresX][squaresY];
+		this.squaresX = squaresX;
+		this.squaresY = squaresY;
+		
+		
 		frame = new JFrame("" + player);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -59,8 +70,7 @@ public class Board extends JPanel {
 				}
 			}
 		});
-		frame.setBounds(x, y, width, height + 250);
-		frame.add(this);
+		frame.setBounds(x, y, width, height);
 		frame.addMouseListener(mouseListen);
 		frame.addMouseMotionListener(mouseMotion);
 		pane = frame.getContentPane();
@@ -70,6 +80,8 @@ public class Board extends JPanel {
 				player.changeEdit();
 			}
 		});
+		this.setPreferredSize(new Dimension(width, height));
+		pane.add(this);
 		pane.add(randomizeShips, BorderLayout.NORTH);
 		pane.add(startGame, BorderLayout.SOUTH);
 		if (!showBtn) {
@@ -86,18 +98,9 @@ public class Board extends JPanel {
 				randomizeShips();
 			}
 		});
-		startGame.setLocation(width / 2, height + 150);
-		
+		frame.pack();
 		frame.setVisible(true);
-		
-		this.width = width;
-		this.height = height;
-		this.squaresXsize = width / squaresX;
-		this.squaresYsize = height / squaresY;
-		this.player = player;
-		misses = new boolean[squaresX][squaresY];
-		this.squaresX = squaresX;
-		this.squaresY = squaresY;
+		repaint();
 	}
 
 	/**
@@ -120,11 +123,11 @@ public class Board extends JPanel {
 	@Override
 	
 	/**
-	 * draws ship on screen as rectangle
+	 * draws stuff on the screen
 	 */
 	public void paint(Graphics g) {
 		g.setColor(Color.BLUE);
-		g.fillRect(0, 0, width, height);
+		g.fillRect(0, 0, width+200, height+200);
 		g.setColor(Color.GRAY);
 		for (int x = 0; x + squaresXsize < width; x += squaresXsize)
 			for (int y = 0; y + squaresYsize < height; y += squaresYsize) {
@@ -137,7 +140,7 @@ public class Board extends JPanel {
 			for (int ii = 0; ii < misses[i].length; ii++) {
 				if (misses[i][ii]) {
 					g.setColor(Color.CYAN);
-					g.fillOval(i*squaresXsize+(squaresXsize/2),ii*squaresYsize+(squaresYsize/2),squaresXsize, squaresYsize);
+					g.fillOval(i*squaresXsize+(squaresXsize/16),ii*squaresYsize+(squaresYsize/16),squaresXsize-(squaresXsize/8), squaresYsize-(squaresYsize/8));
 				}
 			}
 		}
@@ -245,6 +248,22 @@ public class Board extends JPanel {
 	public int getSquaresYsize() {
 		return squaresYsize;
 	}
+	
+	@Override
+	/**
+	 * @return number of squares along x dimension
+	 */
+	public int getX(){
+		return squaresX;
+	}
+	
+	@Override
+	/**
+	 * @return number of squares along y dimension
+	 */
+	public int getY(){
+		return squaresY;
+	}
 
 	private boolean isInBoardBounds(int x, int y) {
 		return x>=0&&y>=0&&x<squaresX&&y<squaresY;
@@ -268,7 +287,13 @@ public class Board extends JPanel {
 		return i*dimension;
 	}
 
-	private Point getLocationRelativeTo() {
+	private Point getLocationRelativeToJFrame() {
+	    int x = frame.getX() - MouseInfo.getPointerInfo().getLocation().x;
+	    int y = frame.getY() - MouseInfo.getPointerInfo().getLocation().y;
+	    return new Point(-x-15, -y-80);
+	}
+	
+	private Point getLocationRelativeToBoard() {
 	    int x = frame.getX() - MouseInfo.getPointerInfo().getLocation().x;
 	    int y = frame.getY() - MouseInfo.getPointerInfo().getLocation().y;
 	    return new Point(toBoardDimensions(-x-15, squaresXsize), toBoardDimensions(-y-80, squaresYsize));
@@ -278,10 +303,10 @@ public class Board extends JPanel {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			//int mX = e.getX()-
-			if(isInBoardBounds((int)getLocationRelativeTo().getX(),(int)getLocationRelativeTo().getY())){
+			if(isInBoardBounds((int)getLocationRelativeToBoard().getX(),(int)getLocationRelativeToBoard().getY())){
 			boolean hit = false;
 			for (Ship ship : ships) {
-				if (ship.isInBounds(getLocationRelativeTo())) {
+				if (ship.isInBounds(getLocationRelativeToBoard())) {
 					if (ship.isMovable()&&Main.localPlayer == player) {
 						System.out.println("Rotating");
 						ship.rotate();
@@ -290,7 +315,7 @@ public class Board extends JPanel {
 						// do nothing- current turn player clicking on self
 					} else if(Main.gameStart){
 						hit = true;
-						if(ship.attack(getLocationRelativeTo())){
+						if(ship.attack(getLocationRelativeToBoard())){
 							System.out.println("Hit!");
 							if(ship.checkDestroyed()) floatingShips--;
 							if(floatingShips <= 0) player.defeat();
@@ -301,8 +326,8 @@ public class Board extends JPanel {
 				}
 			}
 			if(!hit&&Main.gameStart&&!player.isCurrentTurn())
-				if(isInBoardBounds((int)getLocationRelativeTo().getX(),(int)getLocationRelativeTo().getY())){
-					int mX = round((int)getLocationRelativeTo().getX(), squaresXsize), mY = round((int)getLocationRelativeTo().getY(), squaresYsize);
+				if(isInBoardBounds((int)getLocationRelativeToBoard().getX(),(int)getLocationRelativeToBoard().getY())){
+					int mX = (int) getLocationRelativeToBoard().getX(), mY = (int)getLocationRelativeToBoard().getY();
 						if(!misses[mX][mY]){
 							misses[mX][mY] = true;
 							System.out.println("Miss!");
@@ -338,20 +363,21 @@ public class Board extends JPanel {
 		}
 	};
 
+	//Dragging handler
 	private MouseMotionAdapter mouseMotion = new MouseMotionAdapter() {
 		@Override
 		public void mouseDragged(MouseEvent e) {
 			System.out.println("Dragging detected");
-			System.out.println(getLocationRelativeTo());
+			System.out.println(getLocationRelativeToJFrame() + "\n" + getLocationRelativeToBoard());
 			if(Main.localPlayer == player)
 			for (Ship ship : ships) {
 				if (movingShip == null) {
-					if (ship.isInBounds(getLocationRelativeTo()))
+					if (ship.isInBounds(getLocationRelativeToBoard()))
 						movingShip = ship;
 				} else if (movingShip == ship)
 					if (ship.isMovable()) {
 						System.out.println("Start dragging ship " + ship);
-						ship.drag(getLocationRelativeTo());
+						ship.drag(getLocationRelativeToBoard());
 						repaint();
 					}
 
@@ -388,7 +414,7 @@ public class Board extends JPanel {
 	
 	/**
 	 * check if point e hit something
-	 * @param e Point to check on board if it hit something
+	 * @param e Point to check on board if it hit something, relative to the board
 	 * @return true if it was a legal move, false otherwise (like clicking on the same thing twice). Use getPrevHit() to determine whether or not it hit a ship.
 	 */
 	public boolean checkHit(Point e){
@@ -417,7 +443,8 @@ public class Board extends JPanel {
 		}
 		if(!hit&&Main.gameStart&&!player.isCurrentTurn())
 			if(isInBoardBounds((int)e.getX(),(int)e.getY())){
-				int mX = toBoardDimensions((int)e.getX(), squaresXsize), mY = toBoardDimensions((int)e.getY(), squaresYsize);
+				int mX = (int)e.getX();
+				int mY = (int)e.getY();
 					if(!misses[mX][mY]){
 						misses[mX][mY] = true;
 						System.out.println("Miss!");
@@ -449,7 +476,8 @@ public class Board extends JPanel {
 	 */
 	public void randomizeShips(){
 		for(Ship ship : ships){
-			while(!ship.positionVal(round((int)(Math.random()*1000),getSquaresXsize()), round((int)(Math.random()*1000),getSquaresYsize()), Math.random()<.5?true:false)){}
+			System.out.println("Randomizing...");
+			while(!ship.positionVal((int)(Math.random()*squaresX), (int)(Math.random()*squaresY), Math.random()<.5?true:false)){}
 			repaint();
 		}
 	}

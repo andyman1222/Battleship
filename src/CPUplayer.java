@@ -18,7 +18,7 @@ public class CPUplayer extends Player {
 	public CPUplayer(String name, int x, int y, int boardX, int boardY, int width, int height) {
 		super(name, x, y, boardX, boardY, width, height, false);
 		getBoard().randomizeShips();
-		alreadyCheckedIndexes = new boolean[getBoard().getWidth()][getBoard().getHeight()];
+		alreadyCheckedIndexes = new boolean[getBoard().getX()][getBoard().getY()];
 	}
 
 	@Override
@@ -62,14 +62,14 @@ public class CPUplayer extends Player {
 			// boats, then tries to sink them.
 			for (Player targetPlayer : Main.getPlayers())
 				if (targetPlayer != this) {
-					System.out.println("TargetPlayer != this");
+					//System.out.println("TargetPlayer != this");
 					targetBoard = targetPlayer.getBoard();
 					for (int i = 0; i < alreadyCheckedIndexes.length; i++)
 						for (int x = 0; x < alreadyCheckedIndexes[i].length; x++) {
 							if (alreadyCheckedIndexes[i][x]) {
 								System.out.println("Found something...");
 								for (Ship ship : targetBoard.getShips())
-									if (ship.isInBounds(new Point(i - 15, x - 80)) && !ship.checkDestroyed()) {
+									if (ship.isInBounds(new Point(i, x)) && !ship.checkDestroyed()) {
 										System.out.println("Found a hit and unsunken ship!");
 										hitX = i;
 										hitY = x;
@@ -92,11 +92,11 @@ public class CPUplayer extends Player {
 				randomPlayer = (int) (Math.random() * Main.getPlayers().length);
 			while (Main.getPlayers()[randomPlayer] == this);
 			targetBoard = Main.getPlayers()[randomPlayer].getBoard();
-			hitX = targetBoard.round((int) (Math.random() * targetBoard.getWidth()), getBoard().getSquaresXsize());
-			hitY = targetBoard.round((int) (Math.random() * targetBoard.getHeight()), getBoard().getSquaresYsize());
+			hitX = (int) (Math.random() * targetBoard.getX());
+			hitY = (int) (Math.random() * targetBoard.getY());
 			while (!targetBoard.checkHit(new Point(hitX, hitY))) {
-				hitX = (int) (Math.random() * targetBoard.getWidth());
-				hitY = (int) (Math.random() * targetBoard.getHeight());
+				hitX = (int) (Math.random() * targetBoard.getX());
+				hitY = (int) (Math.random() * targetBoard.getY());
 			}
 			alreadyCheckedIndexes[hitX][hitY] = getBoard().getPrevHit();
 			if (targetBoard.getPrevHit()) {
@@ -117,19 +117,19 @@ public class CPUplayer extends Player {
 			nextY = backupY;
 			switch (step) {
 			case 1:
-				nextX += getBoard().getSquaresXsize();
+				nextX ++;
 				// backupX -= getBoard().getSquaresXsize();
 				break;
 			case 2:
-				nextX -= getBoard().getSquaresXsize();
+				nextX --;
 				// backupX += getBoard().getSquaresXsize();
 				break;
 			case 3:
-				nextY += getBoard().getSquaresYsize();
+				nextY ++;
 				// backupY -= getBoard().getSquaresYsize();
 				break;
 			case 4:
-				nextY -= getBoard().getSquaresYsize();
+				nextY --;
 				// backupY += getBoard().getSquaresYsize();
 				break;
 			default:
@@ -163,16 +163,16 @@ public class CPUplayer extends Player {
 		else {
 			switch (step) {
 			case 1:
-				nextX += targetBoard.getSquaresXsize();
+				nextX ++;
 				break;
 			case 2:
-				nextX -= targetBoard.getSquaresXsize();
+				nextX --;
 				break;
 			case 3:
-				nextY += targetBoard.getSquaresYsize();
+				nextY ++;
 				break;
 			case 4:
-				nextY -= targetBoard.getSquaresYsize();
+				nextY --;
 				break;
 			default:
 				prevHits = 0;
