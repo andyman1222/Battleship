@@ -4,6 +4,7 @@ public class Player {
 	private String name;
 	private Board board;
 	private boolean isSettingUp = true, currentTurn;
+	private int points = 0;
 	
 	/**
 	 * creates new Player with specified name, board size, window size, window position, and whether or not to show the start game btn
@@ -144,5 +145,13 @@ public class Player {
 	 */
 	public boolean isComputer(){
 		return false;
+	}
+	
+	public void addPoints(int points){
+		this.points += points;
+	}
+	
+	public int getPoints(){
+		return points;
 	}
 }

@@ -4,7 +4,11 @@ import java.awt.Button;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -16,7 +20,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class Board extends JPanel {
@@ -30,7 +36,6 @@ public class Board extends JPanel {
 	private Button startGame = new Button("Start game");
 	private Button randomizeShips = new Button("Randomize ships");
 	private int floatingShips;
-	
 	
 	/**
 	 * create a new, preinitialized board
@@ -80,18 +85,17 @@ public class Board extends JPanel {
 				player.changeEdit();
 			}
 		});
-		this.setPreferredSize(new Dimension(width, height));
+		this.setPreferredSize(new Dimension(width, height+50));
+		pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
 		pane.add(this);
-		pane.add(randomizeShips, BorderLayout.NORTH);
-		pane.add(startGame, BorderLayout.SOUTH);
+		pane.add(randomizeShips);
+		pane.add(startGame);
 		if (!showBtn) {
 			//System.out.println("Showing button");
 			pane.remove(randomizeShips);
 			pane.remove(startGame);
-			pane.add(new Button(), BorderLayout.NORTH);
 			
 		}
-		
 		randomizeShips.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -127,7 +131,7 @@ public class Board extends JPanel {
 	 */
 	public void paint(Graphics g) {
 		g.setColor(Color.BLUE);
-		g.fillRect(0, 0, width+200, height+200);
+		g.fillRect(0, 0, width, height);
 		g.setColor(Color.GRAY);
 		for (int x = 0; x + squaresXsize < width; x += squaresXsize)
 			for (int y = 0; y + squaresYsize < height; y += squaresYsize) {
@@ -144,6 +148,10 @@ public class Board extends JPanel {
 				}
 			}
 		}
+		g.setColor(Color.WHITE);
+		g.setFont(new Font("MONOSPACED", Font.PLAIN, 16));
+		g.drawString("Ships left: " + floatingShips, width/3, height-30);
+		g.drawString("Points: " + player.getPoints(), width*2/3, height-30);
 	}
 
 	/**
@@ -294,13 +302,13 @@ public class Board extends JPanel {
 	private Point getLocationRelativeToJFrame() {
 	    int x = frame.getX() - MouseInfo.getPointerInfo().getLocation().x;
 	    int y = frame.getY() - MouseInfo.getPointerInfo().getLocation().y;
-	    return new Point(-x-15, -y-80);
+	    return new Point(-x-15, -y-60);
 	}
 	
 	private Point getLocationRelativeToBoard() {
 	    int x = frame.getX() - MouseInfo.getPointerInfo().getLocation().x;
 	    int y = frame.getY() - MouseInfo.getPointerInfo().getLocation().y;
-	    return new Point(toBoardDimensions(-x-15, squaresXsize), toBoardDimensions(-y-80, squaresYsize));
+	    return new Point(toBoardDimensions(-x-15, squaresXsize), toBoardDimensions(-y-60, squaresYsize));
 	}
 	
 	private MouseAdapter mouseListen = new MouseAdapter() {
@@ -317,13 +325,20 @@ public class Board extends JPanel {
 						repaint();
 					} else if (Main.getCurrentPlayer() == player) {
 						// do nothing- current turn player clicking on self
-					} else if(Main.gameStart){
+					} else if(Main.gameStart&&!Main.currentPlayer.isComputer()){
 						if(isInBoardBoundsAttack((int)getLocationRelativeToBoard().getX(),(int)getLocationRelativeToBoard().getY())){
 							hit = true;
 							if(ship.attack(getLocationRelativeToBoard())){
 								System.out.println("Hit!");
-								if(ship.checkDestroyed()) floatingShips--;
-								if(floatingShips <= 0) player.defeat();
+								Main.currentPlayer.addPoints(10);
+								if(ship.checkDestroyed()){
+									floatingShips--;
+									Main.currentPlayer.addPoints((int) (ship.getBounds().getWidth()*ship.getBounds().getHeight()*10));
+								}
+								if(floatingShips <= 0){
+									Main.currentPlayer.addPoints(player.getPoints());
+									player.defeat();
+								}
 								repaint();
 								Main.nextTurn();
 							}
@@ -331,7 +346,7 @@ public class Board extends JPanel {
 					}
 				}
 			}
-			if(!hit&&Main.gameStart&&!player.isCurrentTurn())
+			if(!hit&&Main.gameStart&&!player.isCurrentTurn()&&!Main.currentPlayer.isComputer())
 				if(isInBoardBoundsAttack((int)getLocationRelativeToBoard().getX()+1,(int)getLocationRelativeToBoard().getY()+1)){
 					int mX = (int) getLocationRelativeToBoard().getX(), mY = (int)getLocationRelativeToBoard().getY();
 						if(!misses[mX][mY]){

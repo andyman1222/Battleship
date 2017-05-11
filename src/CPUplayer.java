@@ -50,6 +50,7 @@ public class CPUplayer extends Player {
 	}
 
 	private int hitX, hitY, backupX, backupY, nextX, nextY, step = 1, randomPlayer, startingPoint = 1;
+	private int[] alreadyChosenStep = new int[4];
 	private Board targetBoard;
 
 	/**
@@ -102,7 +103,10 @@ public class CPUplayer extends Player {
 			if (targetBoard.getPrevHit()) {
 				System.out.println("Attempting to find ship...");
 				prevHits++;
-				step = 1;
+				for(int x = 0; x < alreadyChosenStep.length; x++)
+					alreadyChosenStep[x] = 0;
+				step = (int) ((Math.random()*4));
+				alreadyChosenStep[step] = 1;
 				backupX = hitX;
 				backupY = hitY;
 				nextX = hitX;
@@ -116,45 +120,59 @@ public class CPUplayer extends Player {
 			nextX = backupX;
 			nextY = backupY;
 			switch (step) {
-			case 1:
+			case 0:
 				nextX ++;
 				// backupX -= getBoard().getSquaresXsize();
 				break;
-			case 2:
+			case 1:
 				nextX --;
 				// backupX += getBoard().getSquaresXsize();
 				break;
-			case 3:
+			case 2:
 				nextY ++;
 				// backupY -= getBoard().getSquaresYsize();
 				break;
-			case 4:
+			case 3:
 				nextY --;
 				// backupY += getBoard().getSquaresYsize();
 				break;
 			default:
 				prevHits = 0;
 			}
+			//illegal move
 			if (!targetBoard.checkHit(new Point(nextX, nextY))) {
 				prevHits = 1;
-				step++;
-				step %= 4 + 1;
-				if (step == startingPoint) {
-					prevHits = 0;
+				boolean seq = false;
+				for(int x : alreadyChosenStep)
+					if(x == 0)
+						seq = true;
+				if(seq){
+					System.out.println("Choosing another move...");
+					while(alreadyChosenStep[step]!=1)
+						step = (int) ((Math.random()*4));
+					alreadyChosenStep[step] = 1;
 				}
-				System.out.println("restarting sequence...");
+				else prevHits = 0;
+				System.out.println("Restarting attack");
 				attack();
+				//ship hit
 			} else if (targetBoard.getPrevHit()) {
 				alreadyCheckedIndexes[nextX][nextY] = targetBoard.getPrevHit();
 				prevHits++;
 				if (targetBoard.sankShip())
 					prevHits = 0;
+				//ship miss
 			} else {
-				step++;
-				step %= 4 + 1;
-				if (step == startingPoint) {
-					prevHits = 0;
+				boolean seq = false;
+				for(int x : alreadyChosenStep)
+					if(x == 0)
+						seq = true;
+				if(seq){
+					while(alreadyChosenStep[step]!=1)
+						step = (int) ((Math.random()*4));
+					alreadyChosenStep[step] = 1;
 				}
+				else prevHits = 0;
 			}
 		}
 
@@ -162,43 +180,61 @@ public class CPUplayer extends Player {
 		// restart if missed and unsunken
 		else {
 			switch (step) {
-			case 1:
+			case 0:
 				nextX ++;
 				break;
-			case 2:
+			case 1:
 				nextX --;
 				break;
-			case 3:
+			case 2:
 				nextY ++;
 				break;
-			case 4:
+			case 3:
 				nextY --;
 				break;
 			default:
 				prevHits = 0;
 			}
+			//illegal move
 			if (!targetBoard.checkHit(new Point(nextX, nextY))) {
 				prevHits = 1;
-				System.out.println("restarting sequence...");
+				switch (step) {
+				case 0:
+					step = 1;
+					break;
+				case 1:
+					step = 0;
+					break;
+				case 2:
+					step = 3;
+					break;
+				case 3:
+					step = 2;
+					break;
+				default:
+					prevHits = 0;
+				}
 				attack();
+				//ship hit
 			} else if (targetBoard.getPrevHit()) {
 				alreadyCheckedIndexes[nextX][nextY] = targetBoard.getPrevHit();
 				prevHits++;
 				if (targetBoard.sankShip())
 					prevHits = 0;
+				//ship miss
 			} else {
 				switch (step) {
-				case 1:
-					step = 2;
-					break;
-				case 2:
+				case 0:
 					step = 1;
 					break;
-				case 3:
-					step = 4;
+				case 1:
+					step = 0;
 					break;
-				case 4:
+				case 2:
 					step = 3;
+					break;
+				case 3:
+					step = 2;
 					break;
 				default:
 					prevHits = 0;
