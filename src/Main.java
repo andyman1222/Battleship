@@ -4,7 +4,7 @@ import javax.swing.JOptionPane;
 public class Main {
 
 	//see all ships no matter what
-	public static boolean dev = true;
+	public static boolean dev = false;
 	
 	//true if you will be playing locally, to prevent other players from cheating
 	public static boolean passNPlay = false;

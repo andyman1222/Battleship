@@ -174,7 +174,7 @@ public class Board extends JPanel {
 		g.setFont(new Font("MONOSPACED", Font.PLAIN, 16));
 		g.drawString("Ships left: " + floatingShips, width / 3, height);
 		g.drawString("Points: " + player.getPoints(), width * 2 / 3, height);
-		g.setFont(new Font("MONOSPACED", Font.PLAIN, 24));
+		g.setFont(new Font("MONOSPACED", Font.PLAIN, 50));
 		if (player.checkDefeat())
 			g.drawString("Player defeated", width / 2, height / 2);
 	}
