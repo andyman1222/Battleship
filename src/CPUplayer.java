@@ -134,6 +134,7 @@ public class CPUplayer extends Player {
 					do
 						randomPlayer = (int) (Math.random() * Main.getPlayers().length);
 					while (Main.getPlayers()[randomPlayer] == this && !Main.getPlayers()[randomPlayer].checkDefeat());
+					targetBoard = Main.getPlayers()[randomPlayer].getBoard();
 					break;
 				default:
 					System.out.println("Case error. checkHit() = " + stat);
@@ -247,6 +248,7 @@ public class CPUplayer extends Player {
 				do
 					randomPlayer = (int) (Math.random() * Main.getPlayers().length);
 				while (Main.getPlayers()[randomPlayer] == this && !Main.getPlayers()[randomPlayer].checkDefeat());
+				targetBoard = Main.getPlayers()[randomPlayer].getBoard();
 			default:
 				getRandomAttack();
 				findTarget();
