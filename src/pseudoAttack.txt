@@ -1,0 +1,5 @@
+UPON THE CPU'S TURN:
+the CPU will look for any ships already not hit but not sunk
+
+UPON A SUCCESSFUL FIRST ATTACK:
+the CPU will determine the best available move

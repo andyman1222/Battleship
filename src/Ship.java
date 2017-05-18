@@ -128,7 +128,7 @@ public class Ship extends JComponent {
 
 	private boolean isInBoardBounds(int x, int y) {
 		System.out.println("" + x  + ">=" + 0 + "&&" + y + ">=" + 0 + "&&" + (x + xSize) + "<" + board.getX() + "&&" + (y + ySize) + "<" + board.getY());
-		return x >= 0 && y >= 0 && x + xSize < board.getX() && y + ySize < board.getY();
+		return x >= 0 && y >= 0 && x + xSize <= board.getX() && y + ySize <= board.getY();
 	}
 
 	private int toJFrameDimensions(int i, int dimension) {
@@ -280,27 +280,32 @@ public class Ship extends JComponent {
 	/**
 	 * attacks the ship
 	 * @param e point to attack the ship at, relative to the board
-	 * @return true if it hit, false otherwise (attempting to hit a region already hit)
+	 * @return 
 	 */
-	public boolean attack(Point e) {
-		int mX = (int) e.getX();
-		int mY = (int) e.getY();
-		System.out.println("" + mX + " " + mY);
-		int hitX = mX-x, hitY = mY-y;
-		if(!rotate){
-			if (damagedSections[hitX][hitY] == false){
-				damagedSections[hitX][hitY] = true;
-				//System.out.println("Registered hit");
-				return true;
+	public AttackStates attack(Point e) {
+		if(isInBounds(e)){
+			int mX = (int) e.getX();
+			int mY = (int) e.getY();
+			System.out.println("" + mX + " " + mY);
+			int hitX = mX-x, hitY = mY-y;
+			if(!rotate){
+				if (damagedSections[hitX][hitY] == false){
+					damagedSections[hitX][hitY] = true;
+					//System.out.println("Registered hit");
+					if(checkDestroyed())return AttackStates.HIT_AND_DESTROYED;
+					else return AttackStates.HIT;
+				}
 			}
-			else return false;
+			else if(damagedSections[hitY][hitX] == false){
+				damagedSections[hitY][hitX] = true;
+				//System.out.println("Registered hit");
+				if(checkDestroyed())return AttackStates.HIT_AND_DESTROYED;
+				else return AttackStates.HIT;
+			}
+			if(checkDestroyed()) return AttackStates.ALREADY_HIT_AND_DESTROYED;
+			else return AttackStates.ALREADY_HIT;
 		}
-		else if(damagedSections[hitY][hitX] == false){
-			damagedSections[hitY][hitX] = true;
-			//System.out.println("Registered hit");
-			return true;
-		}
-		else return false;
+		else return AttackStates.MISS;
 	}
 	
 	public boolean checkDestroyed(){

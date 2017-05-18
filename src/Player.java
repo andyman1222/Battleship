@@ -5,6 +5,7 @@ public class Player {
 	private Board board;
 	private boolean isSettingUp = true, currentTurn;
 	private int points = 0;
+	private boolean defeated = false;
 	
 	/**
 	 * creates new Player with specified name, board size, window size, window position, and whether or not to show the start game btn
@@ -64,8 +65,12 @@ public class Player {
 	 * call when the player loses
 	 */
 	public void defeat(){
+		defeated = true;
 		JOptionPane.showMessageDialog(null, name + " has been defeated by " + Main.getCurrentPlayer() + "!");
-		Main.destroy(this);
+	}
+	
+	public boolean checkDefeat(){
+		return defeated;
 	}
 	
 	/**
@@ -91,7 +96,7 @@ public class Player {
 			ship.changeMovable();
 		}
 		isSettingUp =! isSettingUp;
-		//System.out.println("Changing state");
+		System.out.println("Changing state- " + isSettingUp);
 	}
 	
 	/**
